@@ -1,0 +1,21 @@
+# AI 공모전 한눈에
+
+> 국내와 해외의 AI 이미지·영상·디자인·음악 공모전을 한 화면에서 찾고, 관심 공모전을 저장하고, 마감일을 달력에 넣을 수 있는 무료 보드입니다.
+
+기준일: 2026-09-14T07:01:44+09:00
+수록 건수: 전체 231건 (국내 176 · 해외 55) / 접수중 58건
+
+정식 페이지:
+- https://kjs369369.github.io/contest-/
+
+원본 데이터(JSON, 이 파일들이 기준입니다):
+- https://kjs369369.github.io/contest-/data/contests.json
+- https://kjs369369.github.io/contest-/data/overseas-contests.json
+
+읽는 방법:
+- 각 레코드의 submission_start / submission_end 는 YYYY-MM-DD 형식입니다.
+- source_type 이 official_ 로 시작하면 주최기관이 통제하는 공식 출처, reference_link 는 참고 링크입니다.
+- result_date 는 공고 원문 표기를 그대로 옮긴 자유 문자열이며 날짜로 단정할 수 없습니다.
+- 요약(summary)은 탐색용 안내이며 주최기관 공고를 대신하지 않습니다.
+
+llms.txt 는 표준이 아닌 안내 파일이며 권리·허가·robots 지시를 변경하지 않습니다.

@@ -1,0 +1,61 @@
+name: Build and deploy board
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # 매일 00:10 Asia/Seoul (15:10 UTC). 예약 실행은 지연될 수 있습니다.
+    - cron: '10 15 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 외부 데이터 갱신은 실패해도 배포를 막지 않는다(저장된 데이터로 빌드).
+      - name: Sync upstream data (best effort)
+        continue-on-error: true
+        run: node scripts/sync-upstream.mjs
+
+      - name: Build
+        run: node src/build.mjs
+
+      - name: Test
+        run: node --test tests/run.mjs
+
+      - name: Collect public files
+        run: |
+          mkdir -p _site
+          cp index.html sitemap.xml llms.txt .nojekyll _site/
+          cp -r assets _site/assets
+          cp -r data _site/data
+          rm -f _site/data/README.md
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

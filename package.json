@@ -1,0 +1,15 @@
+{
+  "name": "ai-contest-board",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "국내·해외 AI 공모전을 한 페이지에서 찾는 정적 보드 (외부 패키지 의존성 없음)",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "node src/build.mjs",
+    "test": "node --test tests/run.mjs",
+    "sync": "node scripts/sync-upstream.mjs",
+    "check": "node scripts/sync-upstream.mjs --dry-run",
+    "serve": "python3 -m http.server 8080"
+  }
+}

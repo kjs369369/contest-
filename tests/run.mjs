@@ -9,6 +9,7 @@ import { join } from 'node:path';
 import { ROOT, stableId, safeUrl, escapeJson, seoulDate } from '../src/lib/util.mjs';
 import { bucketOf, daysLeft, decorate, matchesQuery, toChosung, compare, categoryKeys, urgency } from '../src/lib/contests.mjs';
 import { cardHtml, esc, safeHref, progress } from '../src/lib/card.mjs';
+import { toIcs, toCsv, csvCell, icsEscape } from '../src/lib/export.mjs';
 
 const config = JSON.parse(readFileSync(join(ROOT, 'config/site.json'), 'utf8'));
 const categories = config.categories;
@@ -133,6 +134,44 @@ test('오늘 날짜는 서울 기준 YYYY-MM-DD', () => {
   assert.match(seoulDate(), /^\d{4}-\d{2}-\d{2}$/);
 });
 
+test('보안: 엑셀(CSV) 수식 주입을 차단한다', () => {
+  assert.equal(csvCell('=1+1'), `"'=1+1"`);
+  assert.equal(csvCell('@SUM(A1)'), `"'@SUM(A1)"`);
+  assert.equal(csvCell('-2+3'), `"'-2+3"`);
+  assert.equal(csvCell('정상 값'), '"정상 값"');
+  assert.equal(csvCell('따옴표"포함'), '"따옴표""포함"');
+});
+
+test('보안: 달력(.ics) 줄바꿈·구분자 주입을 차단한다', () => {
+  const text = icsEscape('제목\nSUMMARY:가짜; 값, 둘');
+  assert.ok(!text.includes('\n'));
+  assert.ok(text.includes('\\;'));
+  assert.ok(text.includes('\\,'));
+});
+
+test('내보내기: 달력 파일 구조와 3일 전 알림', () => {
+  const item = decorate(base, { today: TODAY, categories });
+  const ics = toIcs([item]);
+  assert.ok(ics.startsWith('BEGIN:VCALENDAR'));
+  assert.ok(ics.includes('DTSTART;VALUE=DATE:20260930'));
+  assert.ok(ics.includes('TRIGGER:-P3D'));
+  assert.ok(ics.trimEnd().endsWith('END:VCALENDAR'));
+  assert.equal(toIcs([decorate({ ...base, submission_end: '미정' }, { today: TODAY, categories })]).includes('BEGIN:VEVENT'), false);
+});
+
+test('내보내기: 엑셀 파일에 BOM과 머리글이 있다', () => {
+  const csv = toCsv([decorate(base, { today: TODAY, categories })]);
+  assert.ok(csv.startsWith('\ufeff'));
+  assert.ok(csv.includes('"제목"'));
+  assert.ok(csv.includes('"접수중"'));
+  assert.ok(csv.includes('"https://example.com/notice"'));
+});
+
+test('내보내기: 허용되지 않는 링크는 빈 값으로 나간다', () => {
+  const csv = toCsv([decorate({ ...base, url: 'javascript:alert(1)' }, { today: TODAY, categories })]);
+  assert.ok(!csv.includes('javascript:'));
+});
+
 /* ---------- 실제 데이터 검증 ---------- */
 for (const source of config.dataSources) {
   const payload = JSON.parse(readFileSync(join(ROOT, source.file), 'utf8'));
@@ -169,6 +208,8 @@ test('생성된 index.html 검증', () => {
   assert.ok(html.includes('assets/app.js'));
   assert.ok(html.includes('application/ld+json'));
   assert.ok(!/href="javascript:/i.test(html));
+  assert.ok(html.includes('Content-Security-Policy'));
+  assert.ok(html.includes('rel="noopener noreferrer"'));
   const data = JSON.parse(html.split('id="board-data">')[1].split('</script>')[0]);
   assert.ok(data.contests.length > 100);
   assert.match(data.today, /^\d{4}-\d{2}-\d{2}$/);

@@ -11,7 +11,7 @@
  */
 import { readFile, writeFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
-import { ROOT, readJson, stableId, nowSeoulIso } from '../src/lib/util.mjs';
+import { ROOT, readJson, stableId, nowSeoulIso, safeUrl } from '../src/lib/util.mjs';
 
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
@@ -30,6 +30,13 @@ function normalize(record, region) {
   const out = { id: stableId(record.title, record.submission_end), region };
   for (const key of CARRY) {
     if (record[key] === undefined || record[key] === null || record[key] === '') continue;
+    // 외부 데이터를 그대로 신뢰하지 않는다. 링크는 http/https 만 통과시킨다.
+    if (key === 'url' || key === 'results_url') {
+      const link = safeUrl(record[key]);
+      if (!link) { console.warn(`  ! 허용되지 않는 링크를 제거했습니다: ${record.title}`); continue; }
+      out[key] = link;
+      continue;
+    }
     out[key] = record[key];
   }
   return out;

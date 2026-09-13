@@ -3,8 +3,9 @@
    서버 렌더링된 목록 위에서 동작합니다(자바스크립트가 꺼져 있어도 목록은 보입니다).
    화면 로직은 contests.mjs / card.mjs 와 공유하므로 여기서는 상태 관리만 합니다.
    ========================================================================== */
-import { BUCKETS, SORTS, decorate, matchesQuery, compare, toTime } from './contests.mjs';
+import { BUCKETS, SORTS, decorate, matchesQuery, compare } from './contests.mjs';
 import { cardHtml, esc, safeHref } from './card.mjs';
+import { toIcs, toCsv } from './export.mjs';
 
 const $ = id => document.getElementById(id);
 const boot = JSON.parse($('board-data').textContent);
@@ -155,39 +156,6 @@ function download(filename, text, mime) {
   anchor.click();
   anchor.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
-function icsEscape(text) {
-  return String(text ?? '').replace(/\\/g, '\\\\').replace(/[;,]/g, match => `\\${match}`).replace(/\r?\n/g, '\\n');
-}
-function icsDate(value, offsetDays = 0) {
-  const time = toTime(value);
-  if (time === null) return null;
-  return new Date(time + offsetDays * 86400000).toISOString().slice(0, 10).replace(/-/g, '');
-}
-function toIcs(list) {
-  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//AI 공모전 한눈에//KO', 'CALSCALE:GREGORIAN'];
-  list.forEach(item => {
-    const start = icsDate(item.submission_end);
-    if (!start) return;
-    lines.push('BEGIN:VEVENT', `UID:${item.id}@contest-board`, `DTSTART;VALUE=DATE:${start}`,
-      `DTEND;VALUE=DATE:${icsDate(item.submission_end, 1)}`,
-      `SUMMARY:[마감] ${icsEscape(item.title)}`,
-      `DESCRIPTION:${icsEscape(`주최: ${item.organizer || '미확인'}\n원문: ${safeHref(item.url) || '링크 없음'}`)}`,
-      'BEGIN:VALARM', 'TRIGGER:-P3D', 'ACTION:DISPLAY', 'DESCRIPTION:공모전 마감 3일 전', 'END:VALARM',
-      'END:VEVENT');
-  });
-  lines.push('END:VCALENDAR');
-  return lines.join('\r\n');
-}
-function toCsv(list) {
-  const head = ['제목', '주최', '분야', '지역', '접수시작', '접수마감', '남은일수', '결과발표', '상태', '원문링크'];
-  const rows = list.map(item => [
-    item.title, item.organizer, item.category, item.region === 'overseas' ? '해외' : '국내',
-    item.submission_start, item.submission_end, item.daysLeft ?? '', item.result_date,
-    BUCKETS.find(bucket => bucket.key === item.bucket)?.label || '', safeHref(item.url)
-  ]);
-  return `﻿${[head, ...rows].map(row => row.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(',')).join('\r\n')}`;
 }
 
 let toastTimer = 0;

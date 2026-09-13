@@ -51,6 +51,7 @@ await writeFile(join(ROOT, 'assets/app.css'), await readFile(join(ROOT, 'src/ass
 await writeFile(join(ROOT, 'assets/app.js'), toBrowser(await readFile(join(ROOT, 'src/assets/app.js'), 'utf8')));
 await writeFile(join(ROOT, 'assets/contests.js'), toBrowser(await readFile(join(ROOT, 'src/lib/contests.mjs'), 'utf8')));
 await writeFile(join(ROOT, 'assets/card.js'), toBrowser(await readFile(join(ROOT, 'src/lib/card.mjs'), 'utf8')));
+await writeFile(join(ROOT, 'assets/export.js'), toBrowser(await readFile(join(ROOT, 'src/lib/export.mjs'), 'utf8')));
 
 /* 4) 페이지 생성 --------------------------------------------------------- */
 const html = renderPage({ config, contests: decorated, ssrList, stats, today, updatedAt });

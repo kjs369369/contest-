@@ -1,0 +1,5 @@
+# 이 도구 전용 의존성 (프로젝트 본체와 분리 — 충돌 방지)
+# 설치:  python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt
+imageio-ffmpeg>=0.4.9   # 정적 ffmpeg 바이너리 자동 제공 (시스템 ffmpeg 있으면 그걸 우선 사용)
+pillow>=10.0.0          # 이미지 크기/EXIF 촬영일시 읽기
+numpy>=1.24.0           # 배경음·효과음 합성 (저작권 안전 기본 사운드)

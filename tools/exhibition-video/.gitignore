@@ -1,0 +1,12 @@
+# 원본 소재와 결과물은 저장소에 올리지 않는다 (용량·저작권·초상권)
+media/photos/*
+media/videos/*
+media/audio/*
+!media/photos/.gitkeep
+!media/videos/.gitkeep
+!media/audio/.gitkeep
+out/*
+!out/.gitkeep
+.venv/
+__pycache__/
+*.pyc

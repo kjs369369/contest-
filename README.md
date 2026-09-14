@@ -130,7 +130,16 @@ contest-/
 - 외부 링크는 `rel="noopener noreferrer"`, `referrer` 정책은 `strict-origin-when-cross-origin` 입니다.
 - 저장소에 비밀키·토큰·개인정보를 넣지 마세요. 배포 워크플로는 어떤 시크릿도 사용하지 않습니다.
 
-## 9. 출처
+## 9. 부가 도구
+
+| 도구 | 위치 | 용도 |
+|---|---|---|
+| 전시회 영상 자동 편집 | `tools/exhibition-video/` | 전시회 사진·영상 폴더 → 전환효과·한글자막·배경음이 들어간 완성 영상 1편 |
+
+본체(정적 웹보드)와 **폴더·가상환경이 완전히 분리**되어 있어 의존성 충돌이 없습니다.
+사용법은 [`tools/exhibition-video/README.md`](tools/exhibition-video/README.md) 를 보세요.
+
+## 10. 출처
 
 공모전 사실 정보(명칭·주최·접수기간·원문 링크)의 초기 수집 출처는
 [AI Contest Board (junyeo217)](https://junyeo217.github.io/ai-contest-board/) 의 공개 데이터입니다.

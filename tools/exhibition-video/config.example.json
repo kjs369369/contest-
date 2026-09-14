@@ -1,0 +1,69 @@
+{
+  "project": {
+    "title": "캔버스 아트 전시회",
+    "subtitle": "2026 기획전 · 빛과 결",
+    "outro": "관람해 주셔서 감사합니다",
+    "outro_sub": "메이랜드AI비즈랩 · AICLab"
+  },
+  "video": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "crf": 18,
+    "preset": "medium"
+  },
+  "timing": {
+    "still_duration": 3.6,
+    "transition": 0.7,
+    "video_max": 6.0,
+    "video_skip_head": 0.5,
+    "intro": 4.5,
+    "outro": 4.0,
+    "section": 2.8
+  },
+  "style": {
+    "font": null,
+    "accent": "#FFD24A",
+    "text_color": "#FFFFFF",
+    "grade": "gallery",
+    "vignette": true,
+    "grain": 0,
+    "zoom": 1.16,
+    "card_color": "#0E0E12",
+    "show_counter": true
+  },
+  "audio": {
+    "bgm": "media/audio/bgm.mp3",
+    "narration": "",
+    "keep_clip_audio": false,
+    "bgm_gain_db": -17,
+    "sfx_gain_db": -7,
+    "sfx": true,
+    "fade_in": 1.5,
+    "fade_out": 2.5,
+    "loudness_lufs": -14
+  },
+  "input": {
+    "media_dir": "media",
+    "captions_csv": "captions.csv",
+    "order": "name"
+  },
+  "output": {
+    "path": "out/exhibition.mp4"
+  },
+  "sections": [
+    {
+      "at_index": 0,
+      "text": "1부 · 빛"
+    },
+    {
+      "at_index": 6,
+      "text": "2부 · 결"
+    }
+  ],
+  "render": {
+    "workers": 0,
+    "chunk_size": 0,
+    "keep_workdir": false
+  }
+}

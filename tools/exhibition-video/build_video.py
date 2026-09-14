@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import sys
 import time
@@ -57,6 +58,17 @@ def log(msg: str) -> None:
     print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
 
 
+def _sweep_orphan_workdirs(out_dir: Path, max_age_hours: float = 12.0) -> None:
+    """중단된 렌더가 남긴 오래된 작업 폴더를 치운다(진행 중인 것은 건드리지 않음)."""
+    cutoff = time.time() - max_age_hours * 3600
+    for d in out_dir.glob(".work-*"):
+        try:
+            if d.is_dir() and d.stat().st_mtime < cutoff:
+                shutil.rmtree(d, ignore_errors=True)
+        except OSError:
+            pass
+
+
 def load_config(path: Path) -> dict:
     cfg = dict(DEFAULTS)
     if path.exists():
@@ -86,10 +98,12 @@ def build(cfg: dict, limit: int | None = None) -> Path:
     photos = sum(1 for i in items if i.kind == "photo")
     log(f"미디어 {len(items)}개 (사진 {photos} · 영상 {len(items) - photos}), 자막 매칭 {matched}건")
 
-    work = ROOT / "out" / ".work"
-    if work.exists():
-        shutil.rmtree(work)
+    # 작업 폴더는 실행마다 분리한다.
+    # 고정 경로를 쓰면 두 렌더가 동시에 돌 때 한쪽이 다른 쪽의 중간 파일을 지워
+    # "Unable to re-open ... No such file or directory" 로 실패한다.
+    work = ROOT / "out" / f".work-{os.getpid()}-{int(time.time())}"
     work.mkdir(parents=True, exist_ok=True)
+    log(f"작업 폴더: {work.name}")
 
     # ---------------- 1) 세그먼트 렌더 ----------------
     timing = cfg["timing"]
@@ -225,6 +239,7 @@ def build(cfg: dict, limit: int | None = None) -> Path:
 
     if not cfg["render"].get("keep_workdir"):
         shutil.rmtree(work, ignore_errors=True)
+        _sweep_orphan_workdirs(ROOT / "out")
 
     size_mb = out_path.stat().st_size / 1024 / 1024
     log(f"완성: {out_path}  ({total / 60:.2f}분 · {size_mb:.1f}MB)")
